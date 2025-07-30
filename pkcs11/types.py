@@ -587,6 +587,18 @@ class Session(IdentifiedBy):
 
         return self._digest_generator(data, **kwargs)
 
+    def set_pin(self, old_pin, new_pin):
+        raise NotImplementedError()
+
+    def init_pin(self, user_pin):
+        raise NotImplementedError()
+
+    def login(self, user_pin, user_type=None):
+        raise NotImplementedError()
+
+    def logout(self):
+        raise NotImplementedError()
+
     def _digest(self, data, mechanism=None, mechanism_param=None):
         raise NotImplementedError()
 
