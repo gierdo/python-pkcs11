@@ -10,10 +10,19 @@ from functools import cached_property
 import chardet
 
 from pkcs11 import CancelStrategy
-from pkcs11.constants import Attribute, MechanismFlag, ObjectClass
-from pkcs11.exceptions import (ArgumentsBad, AttributeTypeInvalid,
-                               MultipleObjectsReturned, NoSuchKey,
-                               SignatureInvalid, SignatureLenRange)
+from pkcs11.constants import (
+    Attribute,
+    MechanismFlag,
+    ObjectClass,
+)
+from pkcs11.exceptions import (
+    ArgumentsBad,
+    AttributeTypeInvalid,
+    MultipleObjectsReturned,
+    NoSuchKey,
+    SignatureInvalid,
+    SignatureLenRange,
+)
 from pkcs11.mechanisms import KeyType, Mechanism
 
 PROTECTED_AUTH = object()
@@ -35,19 +44,16 @@ class IdentifiedBy:
 
 def _CK_UTF8CHAR_to_str(data):
     """Convert _CK_UTF8CHAR_to_str to string using chardet for encoding detection."""
-    # Remove null bytes and trailing whitespace
     cleaned_data = data.rstrip(b"\0")
 
-    # Detect encoding
-    detected = chardet.detect(cleaned_data)
-    encoding = detected["encoding"] or "utf-8"  # Fallback to utf-8 if detection fails
+    detected_encoding = chardet.detect(cleaned_data)
+    encoding = detected_encoding["encoding"] or "utf-8"
 
-    # Decode the data
     try:
         return cleaned_data.decode(encoding).rstrip()
     except UnicodeDecodeError:
-        # If decoding fails, try utf-8 as a last resort
-        return cleaned_data.decode("utf-8", errors="replace").strip()
+        # If decoding fails, try utf-8 with default error replacement character as a last resort
+        return cleaned_data.decode("utf-8", errors="replace").rstrip()
 
 
 def _CK_VERSION_to_tuple(data):
@@ -70,15 +76,7 @@ class MechanismInfo:
     See :meth:`pkcs11.Slot.get_mechanism_info`.
     """
 
-    def __init__(
-        self,
-        slot,
-        mechanism,
-        ulMinKeySize=None,
-        ulMaxKeySize=None,
-        flags=None,
-        **kwargs,
-    ):
+    def __init__(self, slot, mechanism, ulMinKeySize=None, ulMaxKeySize=None, flags=None, **kwargs):
         self.slot = slot
         """:class:`pkcs11.Slot` this information is for."""
         self.mechanism = mechanism
@@ -93,17 +91,14 @@ class MechanismInfo:
     def __str__(self):
         return "\n".join(
             (
-                "Supported key lengths: [%s, %s]"
-                % (self.min_key_length, self.max_key_length),
+                "Supported key lengths: [%s, %s]" % (self.min_key_length, self.max_key_length),
                 "Flags: %s" % self.flags,
             )
         )
 
     def __repr__(self):
         return "<{klass} (mechanism={mechanism}, flags={flags})>".format(
-            klass=type(self).__name__,
-            mechanism=str(self.mechanism),
-            flags=str(self.flags),
+            klass=type(self).__name__, mechanism=str(self.mechanism), flags=str(self.flags)
         )
 
 
